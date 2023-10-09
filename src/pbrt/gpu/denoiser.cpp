@@ -40,6 +40,10 @@ Denoiser::Denoiser(Vector2i resolution, bool haveAlbedoAndNormal)
     OPTIX_CHECK(optixDeviceContextCreate(cudaContext, 0, &optixContext));
 
     OptixDenoiserOptions options = {};
+#if (OPTIX_VERSION >= 80000)
+    options.denoiseAlpha = OPTIX_DENOISER_ALPHA_MODE_COPY;
+#endif
+
 #if (OPTIX_VERSION >= 70300)
     if (haveAlbedoAndNormal)
         options.guideAlbedo = options.guideNormal = 1;
@@ -101,9 +105,9 @@ void Denoiser::Denoise(RGB *rgb, Normal3f *n, RGB *albedo, RGB *result) {
         CUdeviceptr(scratchBuffer), memorySizes.withoutOverlapScratchSizeInBytes));
 
     OptixDenoiserParams params = {};
-#if (OPTIX_VERSION >= 70500)
+#if (OPTIX_VERSION >= 70500 && OPTIX_VERSION < 80000)
     params.denoiseAlpha = OPTIX_DENOISER_ALPHA_MODE_COPY;
-#else
+#elif (OPTIX_VERSION < 70500)
     params.denoiseAlpha = 0;
 #endif
     params.hdrIntensity = CUdeviceptr(intensity);

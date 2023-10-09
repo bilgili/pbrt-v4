@@ -1052,9 +1052,14 @@ OptixPipelineCompileOptions OptiXAggregate::getPipelineCompileOptions() {
     pipelineCompileOptions.numPayloadValues = 3;
     pipelineCompileOptions.numAttributeValues = 4;
     // OPTIX_EXCEPTION_FLAG_NONE;
+
     pipelineCompileOptions.exceptionFlags =
-        (OPTIX_EXCEPTION_FLAG_STACK_OVERFLOW | OPTIX_EXCEPTION_FLAG_TRACE_DEPTH |
-         OPTIX_EXCEPTION_FLAG_DEBUG);
+        OPTIX_EXCEPTION_FLAG_STACK_OVERFLOW | OPTIX_EXCEPTION_FLAG_TRACE_DEPTH;
+#if (OPTIX_VERSION < 80000)
+    // Removed in OptiX SDK 8.0.0.
+    // OPTIX_DEVICE_CONTEXT_VALIDATION_MODE_ALL used instead.
+    pipelineCompileOptions.exceptionFlags |= OPTIX_EXCEPTION_FLAG_DEBUG;
+#endif
     pipelineCompileOptions.pipelineLaunchParamsVariableName = "params";
 
     return pipelineCompileOptions;
